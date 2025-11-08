@@ -19,6 +19,7 @@ function draw() {
   fill(220);
   rect(0,height-height/4,width,height/4);
   rect(0,0,20, 20);
+  rect(40,0,20, 20);
   fill(0);
   text("Age: " + age, 10, height-height/5);
   text("Money: " + money, 10, (height-height/5)+15);
