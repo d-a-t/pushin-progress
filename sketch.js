@@ -21,14 +21,18 @@ let money; // money will rarely be used
 let health; // game ends if health reaches 0. Visit the hospital to maintain your health
 let looks; //
 let intelligence; // intelligence can affect job opportunities 
-let happiness;
+let mentalHealth;
 let name = "";
 let buttons = [];
 let menuOn = -1;
+let moves = 3;
 
-// player variables speccific to items they have chosen
+// player variables specific to items they have chosen
 let skills = [];
 let home;
+let spouse;
+let children = [];
+let job;
 
 //helper for mouse click
 let mouseWasPressedLastFrame = false;
@@ -90,8 +94,8 @@ function setup() {
   health = int(random(10, 100));
   intelligence = int(random(10, 100));
   looks = int(random(10, 100));
-  happiness = int(random(10, 100));
-  buttons = [{name:"Jobs",x:(width - width/3)+55, y:(height-height/5)-10},{name:"Relationships",x:(width - width/3)+40, y:(height-height/5)+15}, {name:"Activities",x:(width - width/3)+50, y:(height-height/5)+40}, {name:"Education",x:(width - width/3)+45, y:(height-height/5)+65}, {name:"Homes",x:(width - width/3)+55, y:(height-height/5)+90}];
+  mentalHealth = int(random(10, 100));
+  buttons = [{name:"Jobs 16+",x:(width - width/3)+55, y:(height-height/5)-10},{name:"Relationships",x:(width - width/3)+40, y:(height-height/5)+15}, {name:"Activities",x:(width - width/3)+50, y:(height-height/5)+40}, {name:"Education 5+",x:(width - width/3)+45, y:(height-height/5)+65}, {name:"Homes 18+",x:(width - width/3)+55, y:(height-height/5)+90}];
 }
 
 
@@ -119,14 +123,27 @@ function draw() {
   fill(0);
   stroke(0);
   //players stats which change troughout the game. The game ends if thhe players health reaches 0
+  if (job != null){
+    text("Job: " + job.name, 10, height-height/5 - 60);
+  } else {
+    text("Unemployed", 10, height-height/5 - 60);
+  }
+  if (home != null){
+    text("Home: " + home.type, 10, height-height/5 - 45);
+  } else {
+    text("Home: " + "with parents", 10, height-height/5 - 45);
+  }
+  text("Skills: " + skills, 10, height-height/5 - 30);
   text("Name: " + name, 10, height-height/5 - 15);
   text("Age: " + age, 10, height-height/5);
   text("Money: " + money, 10, (height-height/5)+15);
   text("Health: " + health, 10, (height-height/5)+30);
   text("Intelligence: " + intelligence, 10, (height-height/5)+45);
   text("Looks: " + looks, 10, (height-height/5)+60);
-  text("Mental Health: " + happiness, 10, (height-height/5)+75);
-  text("Click Space to age up!", 10, (height-height/5)+90);
+  text("Mental Health: " + mentalHealth, 10, (height-height/5)+75);
+  text("Moves Left: " + moves, 10, (height-height/5)+90);
+  text("Click Space to age up!", 10, (height-height/5)+105);
+  
   stroke(10);
   fill(220);
   // Makes buttons where the player can make decisions
@@ -155,6 +172,13 @@ function draw() {
 function keyPressed() {
   // The player will age and a new random event will happen to them at that year
   if ((key === ' ' || keyCode === 65) && health > 0) {
+    moves = 3;
+    if(home != null) {
+      money -= home.cost;
+    }
+    if(job != null) {
+      money += job.pay;
+    }
     age += 1;
     // You can have a maximum of 10 skill points. Older skills will be lost. Spec into specific skills to get job opportunities.
     if (skills.length > 10) {
@@ -166,8 +190,11 @@ function keyPressed() {
     if (age > 60) {
       health -= 1;
     }
-    print(health);
-    //print(skills);
+    if (mentalHealth < 50) {
+      health -= 1;
+    }
+    //print(health);
+    print(skills);
   }
   
 }
@@ -193,6 +220,9 @@ function drawMenu(info) {
   rect(150, 50, 300, 300, 20);
   fill(0);
   text(info.name,250,75);
+  if (moves <= 0){ //dont draw the menu if the player runs out of moves
+    menuOn = -1;
+  }
   if (menuOn == 0) { //draws menu for jobs
     let space = 0;
     for (let r of jobList) {
@@ -201,8 +231,13 @@ function drawMenu(info) {
       rect(370,89 + space,60,12,20);
       fill(0);
       text("Apply", 380, 100 + space);
-      if(mouseIsPressed && (mouseX > 370 && mouseX < 370+60 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
+      if(age > 15 && (mouseIsPressed && !mouseWasPressedLastFrame) && (mouseX > 370 && mouseX < 370+60 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
         print(r.name);// stuff will happen here latter
+        if (checkSkills(r.type) >= r.difficulty) {
+          job = r;
+          print("youre hired for " + r.name);
+        }
+        moves -= 1;
       }
       space+=15;
     }
@@ -215,8 +250,13 @@ function drawMenu(info) {
       rect(370,89 + space,70,12,20);
       fill(0);
       text("Hang out", 380, 100 + space);
-      if(mouseIsPressed && (mouseX > 370 && mouseX < 370+70 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
+      if((mouseIsPressed && !mouseWasPressedLastFrame) && (mouseX > 370 && mouseX < 370+70 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
         print(r.name);// stuff will happen here latter
+        if (mentalHealth < 100) {
+          mentalHealth += 1;
+        }
+        moves -= 1;
+        print(moves);
       }
       space+=15;
     }
@@ -230,8 +270,9 @@ function drawMenu(info) {
       fill(0);
       text("Join", 380, 100 + space);
       if((mouseIsPressed && !mouseWasPressedLastFrame) && (mouseX > 370 && mouseX < 370+40 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
-        print(r.name);// stuff will happen here later
+        print(r.name);
         append(skills, r.type);
+        moves -= 1;
         break;
       }
       space+=15;
@@ -243,10 +284,16 @@ function drawMenu(info) {
       fill(220);
       rect(370,89 + space,40,12,20);
       fill(0);
-      text("Join", 380, 100 + space);
-      if((mouseIsPressed && !mouseWasPressedLastFrame) && (mouseX > 370 && mouseX < 370+40 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
+      text("Study", 380, 100 + space);
+      if(age > 4 && (mouseIsPressed && !mouseWasPressedLastFrame) && (mouseX > 370 && mouseX < 370+40 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
         print(r.name);// stuff will happen here latter
+        if (mentalHealth > 0) {
+          mentalHealth -= r.difficulty;
+          
+          intelligence += r.difficulty;
+        }
         append(skills, r.type);
+        moves -= 1;
         break;
       }
       space+=15;
@@ -260,11 +307,25 @@ function drawMenu(info) {
       rect(370,89 + space,40,12,20);
       fill(0);
       text("Rent", 380, 100 + space);
-      if(mouseIsPressed && (mouseX > 370 && mouseX < 370+40 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
+      if(age > 17 && mouseIsPressed && (mouseX > 370 && mouseX < 370+40 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
         print(r.type);// stuff will happen here latter
+        if (money >= r.cost) {
+          home = r;
+          print("got home");
+        }
+        moves -= 1;
       }
       space+=15;
     }
+  }
+  if (menuOn != -1) {
+    fill(220);
+    rect(415,60,20,20,20);
+    fill(0);
+    text("X", 420, 75);
+    if(mouseIsPressed && (mouseX > 415 && mouseX < 415+20 && mouseY > 60 && mouseY < 60+12)) {
+        menuOn = -1;
+      }
   }
 }
 
@@ -272,14 +333,14 @@ function drawMenu(info) {
 
 
 // creates people to interact with the player
-function makePerson(age, money, health, intelligence, looks, happiness, relation, name) {
+function makePerson(age, money, health, intelligence, looks, mentalHealth, relation, name) {
   return {
     age:age,
     money:money,
     health:health,
     intelligence:intelligence,
     looks:looks,
-    happiness:happiness,
+    mentalHealth:mentalHealth,
     relation:relation,
     name:name
   }
@@ -321,4 +382,16 @@ function makeJob(name, difficulty, type, pay) {
     type:type,
     pay:pay
   }
+}
+  
+// checks how many skill points the player has
+function checkSkills(skill){
+  let count = 0;
+
+  for (let i = 0; i < skills.length; i++) {
+    if (skills[i] === skill) {
+      count++;
+    }
+  }
+  return count
 }
