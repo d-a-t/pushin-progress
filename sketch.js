@@ -193,11 +193,11 @@ function keyPressed() {
     }
     if (age > 30) {
       health -= 1;
-      mentalhealth -= 1;
+      mentalHealth -= 1;
     }
     if (age > 60) {
       health -= 1;
-      mentalhealth -= 1;
+      mentalHealth -= 1;
     }
     if (mentalHealth < 50) {
       health -= 1;
@@ -212,11 +212,11 @@ function keyPressed() {
     
         if (r.age > 30) {
           r.health -= 1;
-          r.mentalhealth -= 1;
+          r.mentalHealth -= 1;
         }
         if (r.age > 60) {
           r.health -= 1;
-          r.mentalhealth -= 1;
+          r.mentalHealth -= 1;
         }
         if (r.mentalHealth < 50) {
           r.health -= 1;
