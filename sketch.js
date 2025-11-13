@@ -4,12 +4,14 @@ let activities;
 let jobs;
 let education;
 let homes;
+let healthcare;
 
 // lists for various decisions
 let actList = [];
 let jobList = [];
 let eduList = [];
 let homeList = [];
+let healthcareList = [];
 let lastNames = [];
 let gender = "";
 let mNames = [];
@@ -43,6 +45,7 @@ function preload() {
   education = loadTable("assets/education.csv", "csv", "header");
   jobs = loadTable("assets/jobs.csv", "csv", "header");
   homes = loadTable("assets/homes.csv", "csv", "header");
+  healthcare = loadTable("assets/healthcare.csv", "csv", "header");
   
 }
 
@@ -95,7 +98,7 @@ function setup() {
   intelligence = int(random(10, 100));
   looks = int(random(10, 100));
   mentalHealth = int(random(10, 100));
-  buttons = [{name:"Jobs 16+",x:(width - width/3)+55, y:(height-height/5)-10},{name:"Relationships",x:(width - width/3)+40, y:(height-height/5)+15}, {name:"Activities",x:(width - width/3)+50, y:(height-height/5)+40}, {name:"Education 5+",x:(width - width/3)+45, y:(height-height/5)+65}, {name:"Homes 18+",x:(width - width/3)+55, y:(height-height/5)+90}];
+  buttons = [{name:"Jobs 16+",x:(width - width/3)+55, y:(height-height/5)-10},{name:"Relationships",x:(width - width/3)+40, y:(height-height/5)+15}, {name:"Activities",x:(width - width/3)+50, y:(height-height/5)+40}, {name:"Education 5+",x:(width - width/3)+45, y:(height-height/5)+65}, {name:"Homes 18+",x:(width - width/3)+55, y:(height-height/5)+90}, {name:"Healthcare",x:(width - width/3)+50, y:(height-height/5)+115}];
 }
 
 
@@ -112,6 +115,9 @@ function setDecisions() {
   }
   for (let r = 0; r < homes.getRowCount(); r++) {
     append(homeList, makeHome(homes.getString(r, "Type"),homes.getString(r, "Properties"),int(homes.getString(r, "Cost")), int(homes.getString(r, "Quality")), false ));
+  }
+  for (let r = 0; r < healthcare.getRowCount(); r++) {
+    append(healthcareList, makeHealthcare(healthcare.getString(r, "Name"),int(healthcare.getString(r, "Cost")), int(healthcare.getString(r, "HealthBoost"))));
   }
 }
 
@@ -152,6 +158,7 @@ function draw() {
   rect(width - width/3, (height-height/5)+25,150, 20, 20);
   rect(width - width/3, (height-height/5)+50, 150, 20, 20);
   rect(width - width/3, (height-height/5)+75, 150, 20, 20);
+  rect(width - width/3, (height-height/5)+100, 150, 20, 20);
   fill(0);
   for (let b of buttons) {
     text(b.name,b.x,b.y);
@@ -209,6 +216,7 @@ function mouseClicked() {
     if (mouseY > height-height/5 +25 && mouseY < (height-height/5 +25)+20) {menuOn = 2 }
     if (mouseY > height-height/5 +50 && mouseY < (height-height/5 +50)+20) {menuOn = 3 }
     if (mouseY > height-height/5 +75&& mouseY < (height-height/5 +75)+20) {menuOn = 4}
+    if (mouseY > height-height/5 +100&& mouseY < (height-height/5 +100)+20) {menuOn = 5}
   }
 }
 
@@ -318,6 +326,30 @@ function drawMenu(info) {
       space+=15;
     }
   }
+  if (menuOn == 5) { //draws menu for healthcare
+    for (let r of healthcareList) {
+      text(r.name + " ; Cost: " + r.cost + " ; HP: +" + r.healthBoost,160,100 + space);
+      fill(220);
+      rect(370,89 + space,50,12,20);
+      fill(0);
+      text("Select", 380, 100 + space);
+      if((mouseIsPressed && !mouseWasPressedLastFrame) && (mouseX > 370 && mouseX < 370+50 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
+        print(r.name);
+        if (money >= r.cost) {
+          money -= r.cost;
+          if (health < 100) {
+            health += r.healthBoost;
+            if (health > 100) {
+              health = 100;
+            }
+          }
+          print("Selected " + r.name + " - Health: " + health);
+        }
+        moves -= 1;
+      }
+      space+=15;
+    }
+  }
   if (menuOn != -1) {
     fill(220);
     rect(415,60,20,20,20);
@@ -381,6 +413,15 @@ function makeJob(name, difficulty, type, pay) {
     difficulty:difficulty,
     type:type,
     pay:pay
+  }
+}
+
+// healthcare options. Free healthcare is normal, expensive healthcare gives more HP for paying.
+function makeHealthcare(name, cost, healthBoost) {
+  return {
+    name:name,
+    cost:cost,
+    healthBoost:healthBoost
   }
 }
   
