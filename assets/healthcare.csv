@@ -1,0 +1,5 @@
+Name,Cost,HealthBoost
+Free Healthcare,0,5
+Basic Healthcare,0,3
+Premium Healthcare,500,20
+Expensive Healthcare,1000,30

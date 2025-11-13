@@ -4,7 +4,18 @@ Technology,Programmer,7000,3
 Government,Lawyer,9000,5
 Education,Teacher,4000,2
 Service,Cashier,2000,1
-Emergency-Serivce,Firefighter,6000,4
+Emergency-Service,Firefighter,6000,4
 Emergency-Service,Police,5000,2
 Service,Chef,4000,3
 Athletic,Boxer,5000,4
+Business,Manager,8000,4
+Finance,Financial Analyst,8500,4
+Design,Graphic Designer,5500,3
+STEM,Scientist,9000,5
+Communication,Journalist,4500,3
+Art,Musician,3500,2
+Athletic,Personal Trainer,4000,3
+Service,Waiter,2500,1
+Technology,Software Engineer,8000,4
+Medicine,Nurse,6000,3
+Engineering,Engineer,8500,4
