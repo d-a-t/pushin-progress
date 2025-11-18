@@ -48,6 +48,16 @@ let mouseWasPressedLastFrame = false;
 let chaos;
 let peace;
 
+let scrollOffset = 0;
+let scrollSpeed = 15;
+let menuHeight = 300; // visible height of menu box
+
+let scrollbarX = 440;      // right side of menu box
+let scrollbarY = 90;       // top of scroll area
+let scrollbarW = 10;       // width of scrollbar
+let scrollbarH = 250;      // total height of scroll area
+let draggingScrollbar = false;
+
 function preload() {
   people = loadTable("assets/people.csv", "csv", "header");
   activities  = loadTable("assets/activities.csv", "csv", "header");
@@ -279,6 +289,53 @@ function mouseClicked() {
   }
 }
 
+function mouseWheel(event) {
+  if (menuOn !== -1) {
+    let clipH = menuHeight - 50;
+
+    // calculate space for this menu
+    let space = 0;
+    if (menuOn == 0) space = jobList.length * 15;
+    if (menuOn == 1) space = relationShips.length * 15;
+    if (menuOn == 2) space = actList.length * 15;
+    if (menuOn == 3) space = eduList.length * 15;
+    if (menuOn == 4) space = homeList.length * 15;
+    if (menuOn == 5) space = healthcareList.length * 15;
+
+    let overflow = space > (clipH - 30);
+
+    if (overflow) {
+      scrollOffset += event.delta / 2;
+      scrollOffset = constrain(scrollOffset, 0, space - (clipH - 30));
+    }
+  }
+}
+
+
+function mousePressed() {
+  // Check if clicking on scrollbar
+  if (
+    mouseX > scrollbarX && mouseX < scrollbarX + scrollbarW &&
+    mouseY > scrollbarY && mouseY < scrollbarY + scrollbarH
+  ) {
+    draggingScrollbar = true;
+  }
+}
+
+function mouseReleased() {
+  draggingScrollbar = false;
+}
+
+function inside(mx, my, x, y, w, h) {
+  return mx > x && mx < x + w && my > y && my < y + h;
+}
+
+function mouseJustClicked() {
+  return (mouseIsPressed && !mouseWasPressedLastFrame);
+}
+
+
+
 //draws the prompts
 function drawEvent(info) {
   //buttons for events
@@ -347,147 +404,213 @@ function drawEvent(info) {
 
 //draws the menus for buttons
 function drawMenu(info) {
-  
+
   stroke(10);
   fill(220);
   rect(150, 50, 300, 300, 20);
   fill(0);
   text(info.name,250,75);
-  if (moves <= 0){ //dont draw the menu if the player runs out of moves
+
+  if (moves <= 0){
     menuOn = -1;
   }
-  if (menuOn == 0) { //draws menu for jobs
-    let space = 0;
-    for (let r of jobList) {
-      text(r.name + " ; " + r.type + " ; " + r.difficulty,160,100 + space);
-      fill(220);
-      rect(370,89 + space,60,12,20);
-      fill(0);
-      text("Apply", 380, 100 + space);
-      if(age > 15 && (mouseIsPressed && !mouseWasPressedLastFrame) && (mouseX > 370 && mouseX < 370+60 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
-        print(r.name);// stuff will happen here latter
-        if (checkSkills(r.type) >= r.difficulty) {
-          job = r;
-          print("youre hired for " + r.name);
-        }
-        moves -= 1;
-      }
-      space+=15;
-    }
-  }
-  if (menuOn == 1) { //draws menu for relationships
-    let space = 0;
-    for (let r of relationShips) {
-      text(r.name + " ; " + r.relation + " ; " + r.age + " ; " + r.status,160,100 + space);
-      fill(220);
-      rect(370,89 + space,70,12,20);
-      fill(0);
-      text("Hang out", 380, 100 + space);
-      if((mouseIsPressed && !mouseWasPressedLastFrame) && (mouseX > 370 && mouseX < 370+70 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
-        print(r.name);// stuff will happen here latter
-        if (mentalHealth < 100) {
-          mentalHealth += 1;
-        }
-        moves -= 1;
-        print(moves);
-      }
-      space+=15;
-    }
-  }
+
+  // ----- START CLIPPING -----
+  push();
+  let clipX = 150;
+  let clipY = 90;
+  let clipW = 300;
+  let clipH = menuHeight - 50;
+
+  // Clip inner list area
+  drawingContext.save();
+  drawingContext.beginPath();
+  drawingContext.rect(clipX, clipY, clipW, clipH);
+  drawingContext.clip();
+
   let space = 0;
-  if (menuOn == 2) { //draws menu for activities
+  let startY = 100 - scrollOffset;
+
+  // Draw list depending on menu
+  if (menuOn == 0) {        
+    for (let r of jobList) {
+      drawMenuItemJob(r, startY + space);
+      space += 15;
+    }
+  }
+  if (menuOn == 1) {        
+    for (let r of relationShips) {
+      drawMenuItemRelationship(r, startY + space);
+      space += 15;
+    }
+  }
+  if (menuOn == 2) {        
     for (let r of actList) {
-      text(r.name + " ; " + r.type,160,100 + space);
-      fill(220);
-      rect(370,89 + space,40,12,20);
-      fill(0);
-      text("Join", 380, 100 + space);
-      if((mouseIsPressed && !mouseWasPressedLastFrame) && (mouseX > 370 && mouseX < 370+40 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
-        print(r.name);
-        append(skills, r.type);
-        moves -= 1;
-        break;
-      }
-      space+=15;
+      drawMenuItemActivity(r, startY + space);
+      space += 15;
     }
   }
-  if (menuOn == 3) { //draws menu for education
+  if (menuOn == 3) {        
     for (let r of eduList) {
-      text(r.name + " ; " + r.type + " ; " + r.difficulty,160,100 + space);
-      fill(220);
-      rect(370,89 + space,40,12,20);
-      fill(0);
-      text("Study", 380, 100 + space);
-      if(age > 4 && (mouseIsPressed && !mouseWasPressedLastFrame) && (mouseX > 370 && mouseX < 370+40 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
-        print(r.name);// stuff will happen here latter
-        if (mentalHealth > 0) {
-          mentalHealth -= r.difficulty;
-          
-          intelligence += r.difficulty;
-        }
-        append(skills, r.type);
-        moves -= 1;
-        break;
-      }
-      space+=15;
+      drawMenuItemEducation(r, startY + space);
+      space += 15;
     }
-    
   }
-  if (menuOn == 4) { //draws menu for homes
+  if (menuOn == 4) {        
     for (let r of homeList) {
-      text(r.type + " ; " + r.properties + " ; " + r.cost,160,100 + space);
-      fill(220);
-      rect(370,89 + space,40,12,20);
-      fill(0);
-      text("Rent", 380, 100 + space);
-      if(age > 17 && mouseIsPressed && (mouseX > 370 && mouseX < 370+40 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
-        print(r.type);// stuff will happen here latter
-        if (money >= r.cost) {
-          home = r;
-          print("got home");
-        }
-        moves -= 1;
-      }
-      space+=15;
+      drawMenuItemHome(r, startY + space);
+      space += 15;
     }
   }
-  if (menuOn == 5) { //draws menu for healthcare
+  if (menuOn == 5) {        
     for (let r of healthcareList) {
-      text(r.name + " ; Cost: " + r.cost + " ; HP: +" + r.healthBoost,160,100 + space);
-      fill(220);
-      rect(370,89 + space,50,12,20);
-      fill(0);
-      text("Select", 380, 100 + space);
-      if((mouseIsPressed && !mouseWasPressedLastFrame) && (mouseX > 370 && mouseX < 370+50 && mouseY > 89 + space && mouseY < 89 + space + 12)) {
-        print(r.name);
-        if (money >= r.cost) {
-          money -= r.cost;
-          if (health < 100) {
-            health += r.healthBoost;
-            if (health > 100) {
-              health = 100;
-            }
-          }
-          print("Selected " + r.name + " - Health: " + health);
-        }
-        moves -= 1;
-      }
-      space+=15;
+      drawMenuItemHealthcare(r, startY + space);
+      space += 15;
     }
   }
+
+  // total scrollable size
+  let totalContent = space;
+  let visibleHeight = clipH - 30;
+
+  let overflow = totalContent > visibleHeight;
+
+  // Limit scroll only if overflow exists
+  if (overflow) {
+    scrollOffset = constrain(scrollOffset, 0, totalContent - visibleHeight);
+  } else {
+    scrollOffset = 0; // disable scrolling when not needed
+  }
+
+  drawingContext.restore();
+  pop();
+
+  // ----- SCROLLBAR -----
+  if (overflow) {
+    // ratio of scroll
+    let scrollRatio = scrollOffset / (totalContent - visibleHeight);
+    scrollRatio = constrain(scrollRatio, 0, 1);
+
+    // thumb size
+    let viewRatio = visibleHeight / totalContent;
+    let thumbH = max(30, scrollbarH * viewRatio);
+
+    // thumb position
+    let thumbY = scrollbarY + (scrollbarH - thumbH) * scrollRatio;
+
+    // track
+    fill(200);
+    rect(scrollbarX, scrollbarY, scrollbarW, scrollbarH, 5);
+
+    // thumb
+    fill(120);
+    rect(scrollbarX, thumbY, scrollbarW, thumbH, 5);
+
+    // dragging behavior
+    if (draggingScrollbar) {
+      let newRatio = (mouseY - scrollbarY - thumbH / 2) / (scrollbarH - thumbH);
+      newRatio = constrain(newRatio, 0, 1);
+      scrollOffset = newRatio * (totalContent - visibleHeight);
+    }
+  }
+  // If no overflow, do NOT draw scrollbar at all.
+
+  // ----- CLOSE BUTTON -----
   if (menuOn != -1) {
     fill(220);
     rect(415,60,20,20,20);
     fill(0);
     text("X", 420, 75);
-    if(mouseIsPressed && (mouseX > 415 && mouseX < 415+20 && mouseY > 60 && mouseY < 60+12)) {
+    if(mouseIsPressed && inside(mouseX,mouseY,415,60,20,20)) {
         menuOn = -1;
-      }
+        scrollOffset = 0;
+    }
   }
 }
 
 
+function drawMenuItemJob(r, y) {
+  text(r.name + " ; " + r.type + " ; " + r.difficulty,160,y);
+  fill(220);
+  rect(370,y-11,60,12,20);
+  fill(0);
+  text("Apply", 380, y);
 
+  if(age > 15 && mouseJustClicked() && inside(mouseX,mouseY,370,y-11,60,12)) {
+    if (checkSkills(r.type) >= r.difficulty) job = r;
+    moves -= 1;
+  }
+}
+
+function drawMenuItemRelationship(r, y) {
+  text(r.name + " ; " + r.relation + " ; " + r.age + " ; " + r.status,160,y);
+  fill(220);
+  rect(370,y-11,70,12,20);
+  fill(0);
+  text("Hang out", 380, y);
+
+  if(mouseJustClicked() && inside(mouseX,mouseY,370,y-11,70,12)) {
+    if (mentalHealth < 100) mentalHealth += 1;
+    moves -= 1;
+  }
+}
+
+function drawMenuItemActivity(r, y) {
+  text(r.name + " ; " + r.type,160,y);
+  fill(220);
+  rect(370,y-11,40,12,20);
+  fill(0);
+  text("Join", 380, y);
+
+  if(mouseJustClicked() && inside(mouseX,mouseY,370,y-11,40,12)) {
+    append(skills, r.type);
+    moves -= 1;
+  }
+}
+
+function drawMenuItemEducation(r, y) {
+  text(r.name + " ; " + r.type + " ; " + r.difficulty,160,y);
+  fill(220);
+  rect(370,y-11,40,12,20);
+  fill(0);
+  text("Study", 380, y);
+
+  if(age > 4 && mouseJustClicked() && inside(mouseX,mouseY,370,y-11,40,12)) {
+    mentalHealth -= r.difficulty;
+    intelligence += r.difficulty;
+    append(skills, r.type);
+    moves -= 1;
+  }
+}
+
+function drawMenuItemHome(r, y) {
+  text(r.type + " ; " + r.properties + " ; " + r.cost,160,y);
+  fill(220);
+  rect(370,y-11,40,12,20);
+  fill(0);
+  text("Rent", 380, y);
+
+  if(age > 17 && mouseJustClicked() && inside(mouseX,mouseY,370,y-11,40,12)) {
+    if (money >= r.cost) home = r;
+    moves -= 1;
+  }
+}
+
+function drawMenuItemHealthcare(r, y) {
+  text(r.name + " ; Cost: " + r.cost + " ; HP: +" + r.healthBoost,160,y);
+  fill(220);
+  rect(370,y-11,50,12,20);
+  fill(0);
+  text("Select", 380, y);
+
+  if(mouseJustClicked() && inside(mouseX,mouseY,370,y-11,50,12)) {
+    if (money >= r.cost) {
+      money -= r.cost;
+      health = min(100, health + r.healthBoost);
+    }
+    moves -= 1;
+  }
+}
 
 // creates people to interact with the player
 function makePerson(age, money, health, intelligence, looks, mentalHealth, relation, name, status) {
