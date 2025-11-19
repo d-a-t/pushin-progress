@@ -13,19 +13,19 @@ const Renderer = {
       emojiSize = 200;
     } else if (PlayerState.age < 13) {
       emoji = "🧒"; // child
-      emojiSize = 250;
+      emojiSize = 200;
     } else if (PlayerState.age < 20) {
-      emoji = PlayerState.gender == "Male" ? "🧑" : "🧑‍🦰"; // teen
-      emojiSize = 300;
+      emoji = PlayerState.gender == "Male" ? "🧑" : "👩"; // teen
+      emojiSize = 200;
     } else if (PlayerState.age < 40) {
       emoji = PlayerState.gender == "Male" ? "🧍" : "🧍‍♀️"; // adult
-      emojiSize = 250;
+      emojiSize = 300;
     } else if (PlayerState.age < 60) {
       emoji = PlayerState.gender == "Male" ? "🧔" : "👩"; // middle age
-      emojiSize = 250;
+      emojiSize = 200;
     } else {
       emoji = PlayerState.gender == "Male" ? "🧓" : "👵"; // OLD YEE YEE
-      emojiSize = 250;
+      emojiSize = 200;
     }
 
     textSize(emojiSize);
