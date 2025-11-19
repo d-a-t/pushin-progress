@@ -1,6 +1,6 @@
 /**
  * holds all the ui-related constants and layout settings.
- * these don't change during gameplay — they're just the
+ * these don't change during gameplay - they're just the
  * design rules for how menus, scrollbars, and buttons look.
  */
 const UIConfig = {

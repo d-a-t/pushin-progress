@@ -34,7 +34,7 @@ const DataLoader = {
    * @returns {void}
    */
   initializePlayer() {
-    // gender is randomized because why not — adds variety
+    // gender is randomized because why not - adds variety
     PlayerState.gender = random(["Male", "Female"]);
 
     // siblings count between 0–2 because a full sitcom cast is too much
@@ -53,7 +53,7 @@ const DataLoader = {
     // throws parents + siblings into the relationship list
     this.createFamily(lastName, siblings);
     
-    // basic stats — fully random cuz it's kinda fun not knowing what you’ll get
+    // basic stats - fully random cuz it's kinda fun not knowing what you’ll get
     PlayerState.age = 0;
     PlayerState.money = 0;
     PlayerState.health = int(random(10, 100));
@@ -85,7 +85,7 @@ const DataLoader = {
       )
     );
     
-    // same thing for mom — mirror approach but using female name pool
+    // same thing for mom - mirror approach but using female name pool
     GameData.lists.relationShips.push(
       EntityFactory.createPerson(
         int(random(25, 40)),
@@ -100,7 +100,7 @@ const DataLoader = {
       )
     );
     
-    // siblings loop — random gender and slightly younger
+    // siblings loop - random gender and slightly younger
     // stats are toned down since they're kids
     for (let i = 0; i < siblings; i++) {
       let gen, rel;
@@ -138,7 +138,7 @@ const DataLoader = {
     // destructuring so i don’t have to type GameData.tables.blah over and over
     const { jobs, activities, education, homes, healthcare, events } = GameData.tables;
     
-    // jobs go into jobList — difficulty, type, pay all come from csv
+    // jobs go into jobList - difficulty, type, pay all come from csv
     for (let r = 0; r < jobs.getRowCount(); r++) {
       GameData.lists.jobList.push(
         EntityFactory.createJob(
@@ -150,7 +150,7 @@ const DataLoader = {
       );
     }
     
-    // activities — super simple, just name + type
+    // activities - super simple, just name + type
     for (let r = 0; r < activities.getRowCount(); r++) {
       GameData.lists.actList.push(
         EntityFactory.createActivity(
@@ -171,7 +171,7 @@ const DataLoader = {
       );
     }
     
-    // house options — each home has type, features, cost, and quality rating
+    // house options - each home has type, features, cost, and quality rating
     // owned always starts false cuz you haven't bought anything yet
     for (let r = 0; r < homes.getRowCount(); r++) {
       GameData.lists.homeList.push(

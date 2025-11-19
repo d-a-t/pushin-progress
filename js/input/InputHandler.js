@@ -6,7 +6,7 @@ const InputHandler = {
 
   /**
    * handles keyboard presses.
-   * right now it's super basic — spacebar or 'A' ages you up.
+   * right now it's super basic - spacebar or 'A' ages you up.
    * @returns {void}
    */
   handleKeyPress() {
@@ -77,7 +77,7 @@ const InputHandler = {
 
 
   /**
-   * handles when mouse is pressed down — specifically for grabbing the scrollbar thumb.
+   * handles when mouse is pressed down - specifically for grabbing the scrollbar thumb.
    * @returns {void}
    */
   handleMousePressed() {
