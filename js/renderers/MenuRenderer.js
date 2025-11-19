@@ -1,9 +1,11 @@
+const menuMinAges = [5, 16, 0, 0, 18, 0]; // matches Education, Jobs, Activities, Relationships, Homes, Healthcare
+
 /**
  * renderer object that draws all the menu stuff.
  * mostly responsible for scrolling, clipping, and buttons.
  */
 const MenuRenderer = {
-
+  
   /**
    * draws the whole menu panel with scrolling n stuff
    * @param {Object} info - data about the menu (mostly the name)
@@ -32,6 +34,14 @@ const MenuRenderer = {
       return;
     }
     
+    if (PlayerState.age < menuMinAges[GameState.menuOn]) {
+        // Player is too young to open this menu
+        print("You are not old enough to access this menu.");
+        GameState.menuOn = -1;
+        return;
+    }
+
+
     stroke(10);
     fill(220);
     rect(panelX, panelY, panelW, panelH, 20);
@@ -129,8 +139,7 @@ const MenuRenderer = {
       menuActions[GameState.menuOn]();
     }
   },
-
-
+  
   /**
    * draws the school list + study buttons
    * @param {number} baseX
@@ -139,26 +148,34 @@ const MenuRenderer = {
    * @param {number} rowGap
    */
   drawEducationItems(baseX, buttonX, startY, rowGap) {
+    const minAge = 5;
     let rowY = startY;
     for (let r of GameData.lists.eduList) {
       text(r.name + " ; " + r.type + " ; " + r.difficulty, baseX, rowY);
-      
-      fill(220);
+
+      let hovered = UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 50, 16);
+      if (hovered && mouseIsPressed) fill(150);
+      else if (hovered) fill(180);
+      else fill(220);
       rect(buttonX, rowY - 4, 50, 16, 20);
+
       fill(0);
       textAlign(CENTER, TOP);
       text("Study", buttonX + 25, rowY - 2);
       textAlign(LEFT, TOP);
-      
-      if (PlayerState.age > 4 && UIHelper.mouseJustClicked() && 
-          UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 50, 16)) {
-        if (PlayerState.mentalHealth > 0) {
-          PlayerState.mentalHealth -= r.difficulty;
-          PlayerState.intelligence += r.difficulty;
+
+      if (UIHelper.mouseJustClicked() && hovered) {
+        if (PlayerState.age >= minAge) {
+          if (PlayerState.mentalHealth > 0) {
+            PlayerState.mentalHealth -= r.difficulty;
+            PlayerState.intelligence += r.difficulty;
+          }
+          PlayerState.skills.push(r.type);
+          GameState.moves -= 1;
+          break;
+        } else {
+          print("You are not old enough to study " + r.name);
         }
-        PlayerState.skills.push(r.type);
-        GameState.moves -= 1;
-        break;
       }
       rowY += rowGap;
     }
@@ -169,50 +186,65 @@ const MenuRenderer = {
    * draws job list + apply buttons
    */
   drawJobItems(baseX, buttonX, startY, rowGap) {
+    const minAge = 16;
     let rowY = startY;
     for (let r of GameData.lists.jobList) {
       text(r.name + " ; " + r.type + " ; " + r.difficulty, baseX, rowY);
-      
-      fill(220);
+
+      let hovered = UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 60, 16);
+      if (hovered && mouseIsPressed) fill(150);
+      else if (hovered) fill(180);
+      else fill(220);
       rect(buttonX, rowY - 4, 60, 16, 20);
+
       fill(0);
       textAlign(CENTER, TOP);
       text("Apply", buttonX + 30, rowY - 2);
       textAlign(LEFT, TOP);
-      
-      if (PlayerState.age > 15 && UIHelper.mouseJustClicked() && 
-          UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 60, 16)) {
-        if (GameLogic.checkSkills(r.type) >= r.difficulty) {
-          PlayerState.job = r;
-          print("You're hired for " + r.name);
+
+      if (UIHelper.mouseJustClicked() && hovered) {
+        if (PlayerState.age >= minAge) {
+          if (GameLogic.checkSkills(r.type) >= r.difficulty) {
+            PlayerState.job = r;
+            print("You're hired for " + r.name);
+          }
+          GameState.moves -= 1;
+        } else {
+          print("You are not old enough for this job");
         }
-        GameState.moves -= 1;
       }
       rowY += rowGap;
     }
   },
 
-
   /**
    * draws activities ("join" buttons)
    */
   drawActivityItems(baseX, buttonX, startY, rowGap) {
+    const minAge = 0;
     let rowY = startY;
     for (let r of GameData.lists.actList) {
       text(r.name + " ; " + r.type, baseX, rowY);
-      
-      fill(220);
+
+      let hovered = UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 50, 16);
+      if (hovered && mouseIsPressed) fill(150);
+      else if (hovered) fill(180);
+      else fill(220);
       rect(buttonX, rowY - 4, 50, 16, 20);
+
       fill(0);
       textAlign(CENTER, TOP);
       text("Join", buttonX + 25, rowY - 2);
       textAlign(LEFT, TOP);
-      
-      if (UIHelper.mouseJustClicked() && 
-          UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 50, 16)) {
-        PlayerState.skills.push(r.type);
-        GameState.moves -= 1;
-        break;
+
+      if (UIHelper.mouseJustClicked() && hovered) {
+        if (PlayerState.age >= minAge) {
+          PlayerState.skills.push(r.type);
+          GameState.moves -= 1;
+          break;
+        } else {
+          print("You are not old enough for this activity");
+        }
       }
       rowY += rowGap;
     }
@@ -223,51 +255,64 @@ const MenuRenderer = {
    * draws the relationships list
    */
   drawRelationshipItems(baseX, buttonX, startY, rowGap) {
+    const minAge = 0;
     let rowY = startY;
     for (let r of GameData.lists.relationShips) {
       text(r.name + " ; " + r.relation + " ; " + r.age + " ; " + r.status, baseX, rowY);
-      
-      fill(220);
+
+      let hovered = UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 80, 16);
+      if (hovered && mouseIsPressed) fill(150);
+      else if (hovered) fill(180);
+      else fill(220);
       rect(buttonX, rowY - 4, 80, 16, 20);
+
       fill(0);
       textAlign(CENTER, TOP);
       text("Hang out", buttonX + 40, rowY - 2);
       textAlign(LEFT, TOP);
-      
-      if (UIHelper.mouseJustClicked() && 
-          UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 80, 16)) {
-        if (PlayerState.mentalHealth < 100) {
-          PlayerState.mentalHealth += 1;
+
+      if (UIHelper.mouseJustClicked() && hovered) {
+        if (PlayerState.age >= minAge) {
+          if (PlayerState.mentalHealth < 100) PlayerState.mentalHealth += 1;
+          GameState.moves -= 1;
+        } else {
+          print("You are not old enough to hang out");
         }
-        GameState.moves -= 1;
       }
       rowY += rowGap;
     }
   },
 
-
   /**
    * draws the homes list
    */
   drawHomeItems(baseX, buttonX, startY, rowGap) {
+    const minAge = 18;
     let rowY = startY;
     for (let r of GameData.lists.homeList) {
       text(r.type + " ; " + r.properties + " ; " + r.cost, baseX, rowY);
-      
-      fill(220);
+
+      let hovered = UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 50, 16);
+      if (hovered && mouseIsPressed) fill(150);
+      else if (hovered) fill(180);
+      else fill(220);
       rect(buttonX, rowY - 4, 50, 16, 20);
+
       fill(0);
       textAlign(CENTER, TOP);
       text("Rent", buttonX + 25, rowY - 2);
       textAlign(LEFT, TOP);
-      
-      if (PlayerState.age > 17 && mouseIsPressed && 
-          UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 50, 16)) {
-        if (PlayerState.money >= r.cost) {
-          PlayerState.home = r;
-          print("Got home");
+
+      if (UIHelper.mouseJustClicked() && hovered) {
+        if (PlayerState.age >= minAge) {
+          if (PlayerState.money >= r.cost) {
+            PlayerState.home = r;
+            print("Got home");
+          }
+          GameState.moves -= 1;
+        } else {
+          print("You are not old enough to rent this home");
         }
-        GameState.moves -= 1;
       }
       rowY += rowGap;
     }
@@ -278,28 +323,33 @@ const MenuRenderer = {
    * draws healthcare options
    */
   drawHealthcareItems(baseX, buttonX, startY, rowGap) {
+    const minAge = 0;
     let rowY = startY;
     for (let r of GameData.lists.healthcareList) {
       text(r.name + " ; Cost: " + r.cost + " ; HP: +" + r.healthBoost, baseX, rowY);
-      
-      fill(220);
+
+      let hovered = UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 60, 16);
+      if (hovered && mouseIsPressed) fill(150);
+      else if (hovered) fill(180);
+      else fill(220);
       rect(buttonX, rowY - 4, 60, 16, 20);
+
       fill(0);
       textAlign(CENTER, TOP);
       text("Select", buttonX + 30, rowY - 2);
       textAlign(LEFT, TOP);
-      
-      if (UIHelper.mouseJustClicked() && 
-          UIHelper.inside(mouseX, mouseY, buttonX, rowY - 4, 60, 16)) {
-        if (PlayerState.money >= r.cost) {
-          PlayerState.money -= r.cost;
-          if (PlayerState.health < 100) {
-            PlayerState.health += r.healthBoost;
-            if (PlayerState.health > 100) PlayerState.health = 100;
+
+      if (UIHelper.mouseJustClicked() && hovered) {
+        if (PlayerState.age >= minAge) {
+          if (PlayerState.money >= r.cost) {
+            PlayerState.money -= r.cost;
+            PlayerState.health = min(100, PlayerState.health + r.healthBoost);
+            print("Selected " + r.name + " - Health: " + PlayerState.health);
           }
-          print("Selected " + r.name + " - Health: " + PlayerState.health);
+          GameState.moves -= 1;
+        } else {
+          print("You are not old enough to select this healthcare option");
         }
-        GameState.moves -= 1;
       }
       rowY += rowGap;
     }
@@ -363,15 +413,19 @@ const MenuRenderer = {
     const closeSize = 22;
     const closeX = panelX + panelW - closeSize - 10;
     const closeY = panelY + 10;
+
+    let hovered = UIHelper.inside(mouseX, mouseY, closeX, closeY, closeSize, closeSize);
+    if (hovered && mouseIsPressed) fill(150);
+    else if (hovered) fill(180);
+    else fill(220);
     
-    fill(220);
     ellipse(closeX + closeSize / 2, closeY + closeSize / 2, closeSize, closeSize);
     fill(0);
     textAlign(CENTER, CENTER);
     textStyle(BOLD);
     text("X", closeX + closeSize / 2, closeY + closeSize / 2 + 1);
     
-    if (mouseIsPressed && UIHelper.inside(mouseX, mouseY, closeX, closeY, closeSize, closeSize)) {
+    if (mouseIsPressed && hovered) {
       GameState.menuOn = -1;
       GameState.scrollOffset = 0;
     }

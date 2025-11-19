@@ -88,24 +88,51 @@ const Renderer = {
       "Education(5+)", "Jobs(16+)", "Activities",
       "Relationships", "Homes(18+)", "Healthcare"
     ];
-    
+
+    const agesRequired = [5, 16, 0, 0, 18, 0]; // min age for each button
     const totalWidth = 6 * btnW + 5 * spacing;
     const startX = (width - totalWidth) / 2;
     const y = (465 - 113) + 20;
-    
+
     textAlign(CENTER, TOP);
     textSize(12);
     fill(255);
-    
+
     for (let i = 0; i < 6; i++) {
       const x = startX + i * (btnW + spacing);
+
+      let hovered = UIHelper.inside(mouseX, mouseY, x, y, btnW, btnH);
+      let clickable = PlayerState.age >= agesRequired[i];
+
+      // button shading
+      if (hovered && mouseIsPressed && clickable) fill(150);
+      else if (hovered && clickable) fill(180);
+      else if (!clickable) fill(100); // greyed out if too young
+      else fill(220);
+
+      rect(x, y, btnW, btnH, 10); // button background
+
+      // icon
       image(GameData.iconImgs[i], x, y, btnW, btnH);
+
+      // label
       text(labels[i], x + btnW / 2, y + btnH + 8);
-      
+
+      // save button bounds for UI logic
       UIConfig.buttons[i].x = x;
       UIConfig.buttons[i].y = y;
       UIConfig.buttons[i].w = btnW;
       UIConfig.buttons[i].h = btnH;
+
+      // click handling
+      if (hovered && UIHelper.mouseJustClicked()) {
+        if (clickable) {
+          GameState.menuOn = i;
+          GameState.scrollOffset = 0;
+        } else {
+          print("You are not old enough for " + labels[i]);
+        }
+      }
     }
   },
   
