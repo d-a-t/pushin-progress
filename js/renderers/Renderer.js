@@ -4,15 +4,35 @@ const Renderer = {
    */
   drawBackground() {
     background("#121212");
-    textSize(345);
-    if (PlayerState.gender == "Male") {
-      text("🧍", 300, 125);
+
+    // pick emoji based on age
+    let emoji;
+    let emojiSize = 345; // default size
+    if (PlayerState.age < 5) {
+      emoji = "👶"; // baby
+      emojiSize = 200;
+    } else if (PlayerState.age < 13) {
+      emoji = "🧒"; // child
+      emojiSize = 250;
+    } else if (PlayerState.age < 20) {
+      emoji = PlayerState.gender == "Male" ? "🧑" : "🧑‍🦰"; // teen
+      emojiSize = 300;
+    } else if (PlayerState.age < 40) {
+      emoji = PlayerState.gender == "Male" ? "🧍" : "🧍‍♀️"; // adult
+      emojiSize = 250;
+    } else if (PlayerState.age < 60) {
+      emoji = PlayerState.gender == "Male" ? "🧔" : "👩"; // middle age
+      emojiSize = 250;
     } else {
-      text("🧍‍♀️", 300, 125);
+      emoji = PlayerState.gender == "Male" ? "🧓" : "👵"; // OLD YEE YEE
+      emojiSize = 250;
     }
-    fill("#1B253A");
-    rect(0, 465, width, 375);
+
+    textSize(emojiSize);
+    textAlign(CENTER, CENTER); // center emoji
+    text(emoji, width / 2, 240); // 300 is roughly vertical cen
   },
+
   
   /**
    * draws the top info bar (name, age, job, money, etc)
