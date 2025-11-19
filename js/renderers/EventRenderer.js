@@ -31,7 +31,7 @@ const EventRenderer = {
     
     textAlign(CENTER, TOP);
     textSize(18);
-    text("event!", panelX + panelW / 2, panelY + 16);
+    text("Event!", panelX + panelW / 2, panelY + 16);
     
     textAlign(LEFT, TOP);
     textSize(13);
@@ -43,14 +43,14 @@ const EventRenderer = {
     text(info.neutral, textMarginX, firstOptionY + 2 * (optionH + optionGap) + 3);
     
     const resultLabelY = firstOptionY + 3 * (optionH + optionGap) + 20;
-    text("result: ", textMarginX, resultLabelY);
+    text("Result: ", textMarginX, resultLabelY);
     
     this.handleEventClicks(info, optionX, optionW, optionH, firstOptionY, optionGap);
     
     text(GameState.result, textMarginX, resultLabelY + 15, panelW - 20, 60);
     
     if (GameState.result != "") {
-      text("press 'q' to close", textMarginX, resultLabelY + 40);
+      text("Press 'q' to close", textMarginX, resultLabelY + 40);
       if (keyIsDown(81)) {
         GameState.currentPrompt = -1;
         GameState.result = "";
@@ -83,7 +83,7 @@ const EventRenderer = {
     
     const thirdY = firstOptionY + 2 * (optionH + optionGap);
     if (UIHelper.inside(mouseX, mouseY, optionX, thirdY, optionW, optionH)) {
-      GameState.result = "nothing happened";
+      GameState.result = "Nothing happened";
       print(GameState.result);
     }
   },
