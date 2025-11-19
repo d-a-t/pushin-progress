@@ -1,4 +1,13 @@
+/**
+ * renderer object that draws all the menu stuff.
+ * mostly responsible for scrolling, clipping, and buttons.
+ */
 const MenuRenderer = {
+
+  /**
+   * draws the whole menu panel with scrolling n stuff
+   * @param {Object} info - data about the menu (mostly the name)
+   */
   drawMenu(info) {
     push();
     
@@ -11,8 +20,9 @@ const MenuRenderer = {
     
     let listLength = this.getListLength();
     let contentHeight = listLength * rowGap;
-    let panelH = headerHeight + contentHeight + bottomPadding;
-    
+    let panelH = headerHeight + contentHeight + bottomPadding * 1.2;
+
+    // don't let it run off the screen lol
     const maxPanelH = height - panelY - 40;
     if (panelH > maxPanelH) panelH = maxPanelH;
     
@@ -26,6 +36,7 @@ const MenuRenderer = {
     fill(220);
     rect(panelX, panelY, panelW, panelH, 20);
     
+    // header text
     fill(0);
     textAlign(CENTER, TOP);
     textStyle(BOLD);
@@ -36,11 +47,14 @@ const MenuRenderer = {
     textSize(13);
     textAlign(LEFT, TOP);
     
+    // clipping area for scrolling
+    const scrollbarWidth = 12;
     const clipX = panelX;
     const clipY = panelY + headerHeight;
-    const clipW = panelW;
+    const clipW = panelW - scrollbarWidth - 4;
     const clipH = panelH - headerHeight - bottomPadding;
-    
+
+    // mask out everything outside the scroll region
     drawingContext.save();
     drawingContext.beginPath();
     drawingContext.rect(clipX, clipY, clipW, clipH);
@@ -51,12 +65,33 @@ const MenuRenderer = {
     
     drawingContext.restore();
     
-    this.drawScrollbar(clipH, listLength * rowGap);
+    // lil scroll bar
+    this.drawScrollbar(
+      clipX + clipW + 4, 
+      clipY,
+      scrollbarWidth,
+      clipH,
+      listLength * rowGap
+    );
+
+    // where UI checks clicks
+    UIConfig.scrollbarX = clipX + clipW - 12;
+    UIConfig.scrollbarY = clipY;
+    UIConfig.scrollbarW = 8;
+    UIConfig.scrollbarH = clipH;
+
+    // close button thing
     this.drawCloseButton(panelX, panelY, panelW);
     
     pop();
+    print("contentHeight:", contentHeight, "clipH:", clipH);
   },
   
+
+  /**
+   * figures out how long the active menu list is
+   * @returns {number} how many rows to show
+   */
   getListLength() {
     const menuTypes = [
       GameData.lists.eduList,
@@ -69,6 +104,14 @@ const MenuRenderer = {
     return menuTypes[GameState.menuOn]?.length || 0;
   },
   
+
+  /**
+   * picks the right menu drawer based on what menu is open
+   * @param {number} panelX - x pos of the panel
+   * @param {number} panelW - width of the panel
+   * @param {number} startY - where to start drawing rows
+   * @param {number} rowGap - vertical spacing for rows
+   */
   drawMenuItems(panelX, panelW, startY, rowGap) {
     const baseX = panelX + 10;
     const buttonX = panelX + panelW - 80;
@@ -86,7 +129,15 @@ const MenuRenderer = {
       menuActions[GameState.menuOn]();
     }
   },
-  
+
+
+  /**
+   * draws the school list + study buttons
+   * @param {number} baseX
+   * @param {number} buttonX
+   * @param {number} startY
+   * @param {number} rowGap
+   */
   drawEducationItems(baseX, buttonX, startY, rowGap) {
     let rowY = startY;
     for (let r of GameData.lists.eduList) {
@@ -112,7 +163,11 @@ const MenuRenderer = {
       rowY += rowGap;
     }
   },
-  
+
+
+  /**
+   * draws job list + apply buttons
+   */
   drawJobItems(baseX, buttonX, startY, rowGap) {
     let rowY = startY;
     for (let r of GameData.lists.jobList) {
@@ -136,7 +191,11 @@ const MenuRenderer = {
       rowY += rowGap;
     }
   },
-  
+
+
+  /**
+   * draws activities ("join" buttons)
+   */
   drawActivityItems(baseX, buttonX, startY, rowGap) {
     let rowY = startY;
     for (let r of GameData.lists.actList) {
@@ -158,7 +217,11 @@ const MenuRenderer = {
       rowY += rowGap;
     }
   },
-  
+
+
+  /**
+   * draws the relationships list
+   */
   drawRelationshipItems(baseX, buttonX, startY, rowGap) {
     let rowY = startY;
     for (let r of GameData.lists.relationShips) {
@@ -181,7 +244,11 @@ const MenuRenderer = {
       rowY += rowGap;
     }
   },
-  
+
+
+  /**
+   * draws the homes list
+   */
   drawHomeItems(baseX, buttonX, startY, rowGap) {
     let rowY = startY;
     for (let r of GameData.lists.homeList) {
@@ -205,7 +272,11 @@ const MenuRenderer = {
       rowY += rowGap;
     }
   },
-  
+
+
+  /**
+   * draws healthcare options
+   */
   drawHealthcareItems(baseX, buttonX, startY, rowGap) {
     let rowY = startY;
     for (let r of GameData.lists.healthcareList) {
@@ -233,34 +304,61 @@ const MenuRenderer = {
       rowY += rowGap;
     }
   },
-  
-  drawScrollbar(visibleHeight, totalContent) {
-    const overflow = totalContent > visibleHeight;
-    
-    if (overflow) {
-      GameState.scrollOffset = constrain(GameState.scrollOffset, 0, totalContent - visibleHeight);
-      
-      const scrollRatio = GameState.scrollOffset / (totalContent - visibleHeight);
-      const viewRatio = visibleHeight / totalContent;
-      const thumbH = max(30, UIConfig.scrollbarH * viewRatio);
-      const thumbY = UIConfig.scrollbarY + (UIConfig.scrollbarH - thumbH) * scrollRatio;
-      
-      fill(200);
-      rect(UIConfig.scrollbarX, UIConfig.scrollbarY, UIConfig.scrollbarW, UIConfig.scrollbarH, 5);
-      
-      fill(120);
-      rect(UIConfig.scrollbarX, thumbY, UIConfig.scrollbarW, thumbH, 5);
-      
-      if (GameState.draggingScrollbar) {
-        let newRatio = (mouseY - UIConfig.scrollbarY - thumbH / 2) / (UIConfig.scrollbarH - thumbH);
-        newRatio = constrain(newRatio, 0, 1);
-        GameState.scrollOffset = newRatio * (totalContent - visibleHeight);
-      }
-    } else {
+
+
+  /**
+   * draws the scroll bar and handles drag logic
+   * @param {number} x
+   * @param {number} y
+   * @param {number} w
+   * @param {number} h
+   * @param {number} contentHeight
+   */
+  drawScrollbar(x, y, w, h, contentHeight) {
+    const overflow = contentHeight > h;
+
+    if (!overflow) {
       GameState.scrollOffset = 0;
+      return;
+    }
+
+    // clamp scrolling
+    GameState.scrollOffset = constrain(
+      GameState.scrollOffset,
+      0,
+      contentHeight - h
+    );
+
+    // track background
+    fill(200);
+    rect(x, y, w, h, 4);
+
+    // thumb height based on how much content is visible
+    const ratioView = h / contentHeight;
+    const thumbH = max(30, h * ratioView);
+    const ratioScroll = GameState.scrollOffset / (contentHeight - h);
+    const thumbY = y + (h - thumbH) * ratioScroll;
+
+    // actual thumb
+    fill(120);
+    rect(x, thumbY, w, thumbH, 4);
+
+    // dragging logic
+    if (GameState.draggingScrollbar) {
+      let newRatio =
+        (mouseY - y - thumbH / 2) / (h - thumbH);
+      newRatio = constrain(newRatio, 0, 1);
+      GameState.scrollOffset = newRatio * (contentHeight - h);
     }
   },
-  
+
+
+  /**
+   * draws the little X button to close the menu
+   * @param {number} panelX
+   * @param {number} panelY
+   * @param {number} panelW
+   */
   drawCloseButton(panelX, panelY, panelW) {
     const closeSize = 22;
     const closeX = panelX + panelW - closeSize - 10;

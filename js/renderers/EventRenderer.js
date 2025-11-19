@@ -1,4 +1,8 @@
 const EventRenderer = {
+  /**
+   * draws the event popup window + all choices
+   * @param {object} info - the event object with text + stats
+   */
   drawEvent(info) {
     push();
     
@@ -27,7 +31,7 @@ const EventRenderer = {
     
     textAlign(CENTER, TOP);
     textSize(18);
-    text("Event!", panelX + panelW / 2, panelY + 16);
+    text("event!", panelX + panelW / 2, panelY + 16);
     
     textAlign(LEFT, TOP);
     textSize(13);
@@ -39,14 +43,14 @@ const EventRenderer = {
     text(info.neutral, textMarginX, firstOptionY + 2 * (optionH + optionGap) + 3);
     
     const resultLabelY = firstOptionY + 3 * (optionH + optionGap) + 20;
-    text("Result: ", textMarginX, resultLabelY);
+    text("result: ", textMarginX, resultLabelY);
     
     this.handleEventClicks(info, optionX, optionW, optionH, firstOptionY, optionGap);
     
     text(GameState.result, textMarginX, resultLabelY + 15, panelW - 20, 60);
     
     if (GameState.result != "") {
-      text("press 'Q' to close", textMarginX, resultLabelY + 40);
+      text("press 'q' to close", textMarginX, resultLabelY + 40);
       if (keyIsDown(81)) {
         GameState.currentPrompt = -1;
         GameState.result = "";
@@ -56,6 +60,15 @@ const EventRenderer = {
     pop();
   },
   
+  /**
+   * handles clicks on the event choices
+   * @param {object} info - event data
+   * @param {number} optionX - left x of choices
+   * @param {number} optionW - width of choices
+   * @param {number} optionH - height of each choice
+   * @param {number} firstOptionY - y of first button
+   * @param {number} optionGap - gap between buttons
+   */
   handleEventClicks(info, optionX, optionW, optionH, firstOptionY, optionGap) {
     if (!UIHelper.mouseJustClicked() || GameState.result != "") return;
     
@@ -75,6 +88,10 @@ const EventRenderer = {
     }
   },
   
+  /**
+   * handles picking the "good" choice
+   * @param {object} info - event object
+   */
   handleGoodChoice(info) {
     let statChange;
     if (PlayerState.skills.includes(info.skill)) {
@@ -90,12 +107,21 @@ const EventRenderer = {
     print(GameState.result);
   },
   
+  /**
+   * handles picking the "evil" choice
+   * @param {object} info - event object
+   */
   handleEvilChoice(info) {
     GameState.result = info.evil1;
     GameLogic.impactSociety(info.impact, -info.impact);
     print(GameState.result);
   },
   
+  /**
+   * updates a player stat based on the event outcome
+   * @param {string} stat - which stat to change
+   * @param {number} change - how much to change it by
+   */
   applyStatChange(stat, change) {
     switch (stat) {
       case "Health":

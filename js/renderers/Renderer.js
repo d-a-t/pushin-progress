@@ -1,4 +1,7 @@
 const Renderer = {
+  /**
+   * draws the whole background behind everything
+   */
   drawBackground() {
     background("#121212");
     textSize(345);
@@ -11,6 +14,9 @@ const Renderer = {
     rect(0, 465, width, 375);
   },
   
+  /**
+   * draws the top info bar (name, age, job, money, etc)
+   */
   drawTopBar() {
     noStroke();
     fill("#1B253A");
@@ -42,12 +48,18 @@ const Renderer = {
     text("Bank Balance", width - 24, 44);
   },
   
+  /**
+   * draws the whole bottom button area
+   */
   drawButtons() {
     fill("#104672");
     rect(0, 465 - 113, width, 113);
     this.drawIconButtons();
   },
   
+  /**
+   * draws the clickable icon buttons (education, jobs, etc)
+   */
   drawIconButtons() {
     const btnW = 60;
     const btnH = 60;
@@ -77,6 +89,9 @@ const Renderer = {
     }
   },
   
+  /**
+   * draws the whole stats section under the buttons
+   */
   drawStatsPanel() {
     textAlign(CENTER, TOP);
     textStyle(NORMAL);
